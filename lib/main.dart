@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:custoviagem/calculoTela.dart';
 import 'package:custoviagem/carroTela.dart';
 import 'package:custoviagem/destinoTela.dart';
@@ -5,24 +6,20 @@ import 'package:custoviagem/gasolinaTela.dart';
 import 'package:custoviagem/model/carros.dart';
 import 'package:custoviagem/model/combustivel.dart';
 import 'package:custoviagem/model/destinos.dart';
-import 'package:custoviagem/model/carrosDAO.dart';
-import 'package:custoviagem/model/combustivelDAO.dart';
-import 'package:custoviagem/model/destinosDAO.dart';
-import 'package:flutter/material.dart';
 
 void main() {
   runApp(const AppCustoViagem());
 }
 
 class AppCustoViagem extends StatefulWidget {
-  const AppCustoViagem({super.key});
+  const AppCustoViagem({Key? key}) : super(key: key);
 
   @override
   State<AppCustoViagem> createState() => _AppCustoViagemState();
 }
 
 class _AppCustoViagemState extends State<AppCustoViagem> {
-  int telaSelecionada = 1;
+  int telaSelecionada = 0;
 
   List<Carros> listaCarros = [
     Carros(nomeCarro: "Golf GT", autonomia: 21.5),
@@ -35,14 +32,8 @@ class _AppCustoViagemState extends State<AppCustoViagem> {
   ];
 
   List<Combustivel> listaCombustivel = [
-    Combustivel(
-        precoCombustivel: 5.45,
-        tipoCombustivel: "Gasolina",
-        dataPreco: DateTime.now()),
-    Combustivel(
-        precoCombustivel: 4.20,
-        tipoCombustivel: "Álcool",
-        dataPreco: DateTime.now()),
+    Combustivel(precoCombustivel: 545, tipoCombustivel: "Gasolina", dataPreco: "12/12/2024"),
+    Combustivel(precoCombustivel: 420, tipoCombustivel: "Álcool", dataPreco: "12/12/2024"),
   ];
 
   void _removerCarro(int index) {
@@ -70,16 +61,16 @@ class _AppCustoViagemState extends State<AppCustoViagem> {
   }
 
   void _inserirCombustivel(Combustivel novoCombustivel) {
-    setState(() {
-      listaCombustivel.add(novoCombustivel);
-    });
-  }
+  setState(() {
+    listaCombustivel.add(novoCombustivel);
+  });
+}
 
-  void _removerCombustivel(int index) {
-    setState(() {
-      listaCombustivel.removeAt(index);
-    });
-  }
+void _removerCombustivel(int index) {
+  setState(() {
+    listaCombustivel.removeAt(index);
+  });
+}
 
   void opcaoSelecionada(int opcao) {
     setState(() {
@@ -88,26 +79,38 @@ class _AppCustoViagemState extends State<AppCustoViagem> {
   }
 
   @override
-  Widget build(BuildContext context) {
-     final List<Widget> listaTelas = <Widget>[
-    CarroTela(listaCarros: listaCarros, onInsert: _inserirCarro, onRemove: _removerCarro),
+Widget build(BuildContext context) {
+  final List<Widget> listaTelas = [
+    CarroTela(
+      onInsert: _inserirCarro,
+      onRemove: _removerCarro,
+    ),
     CalculoTela(
-        carros: listaCarros,
-        destinos: listaDestinos,
-        combustivel: listaCombustivel),
-    DestinoTela(listaDestinos: listaDestinos, onInsert: _inserirDestino, onRemove: _removerDestino),
-    GasolinaTela(listaCombustivel: listaCombustivel, onInsert: _inserirCombustivel, onRemove: _removerCombustivel),
+      carros: listaCarros,
+      destinos: listaDestinos,
+      combustivel: listaCombustivel,
+    ),
+    DestinoTela(
+      listaDestinos: listaDestinos,
+      onInsert: _inserirDestino,
+      onRemove: _removerDestino,
+    ),
+    GasolinaTela(
+      listaCombustivel: listaCombustivel,
+      onInsert: _inserirCombustivel,
+      onRemove: _removerCombustivel,
+    ),
   ];
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "App Custo Viagem",
-      home: Scaffold(
-        body: Center(child: listaTelas[telaSelecionada]),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.shifting,
-          unselectedItemColor: const Color.fromARGB(255, 88, 88, 88),
-          fixedColor: const Color.fromARGB(255, 255, 255, 255),
+  return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    title: "App Custo Viagem",
+    home: Scaffold(
+      body: Center(child: listaTelas[telaSelecionada]),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.shifting,
+        unselectedItemColor: const Color.fromARGB(255, 88, 88, 88),
+        selectedItemColor: const Color.fromARGB(255, 255, 255, 255),
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.car_rental_rounded),
@@ -116,7 +119,7 @@ class _AppCustoViagemState extends State<AppCustoViagem> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calculate_rounded),
-            label: 'Calculo',
+            label: 'Cálculo',
             backgroundColor: Color.fromARGB(255, 0, 0, 0),
           ),
           BottomNavigationBarItem(
@@ -133,7 +136,7 @@ class _AppCustoViagemState extends State<AppCustoViagem> {
         currentIndex: telaSelecionada,
         onTap: opcaoSelecionada,
       ),
-    )
-    );
-  }
+    ),
+  );
+}
 }

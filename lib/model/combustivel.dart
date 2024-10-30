@@ -6,7 +6,7 @@ class Combustivel {
   int? id;
   double precoCombustivel=0.00;
   String tipoCombustivel="";
-  DateTime dataPreco;
+  String dataPreco;
   Combustivel(
     {this.id,
       required this.precoCombustivel,
@@ -19,7 +19,7 @@ class Combustivel {
       'id': id,
       'precoCombustivel': precoCombustivel,
       'tipoCombustivel': tipoCombustivel,
-      'dataPreco': dataPreco
+      'dataPreco': dataPreco,
     };
   }
 
@@ -28,7 +28,7 @@ class Combustivel {
       id: map['id'],
       precoCombustivel: map['precoCombustivel'],
       tipoCombustivel: map['tipoCombustivel'],
-      dataPreco: map['dataPreco']
+      dataPreco: map['dataPreco'],
     );
   }
 }

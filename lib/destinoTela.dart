@@ -1,13 +1,19 @@
+import 'package:custoviagem/DatabaseHelper.dart';
 import 'package:custoviagem/cardDestino.dart';
 import 'package:custoviagem/model/destinos.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class DestinoTela extends StatefulWidget {
-  final List<Destinos> listaDestinos;
-  final Function(int) onRemove;
-  final Function(Destinos) onInsert;
-  const DestinoTela({super.key, required this.onInsert, required this.onRemove, required this.listaDestinos});
+  final List<Destinos> listaDestinos; // Adiciona a lista de destinos
+  final Function(Destinos) onInsert; // Função para inserir destino
+  final Function(int) onRemove; // Função para remover destino
+
+  const DestinoTela({
+    Key? key,
+    required this.listaDestinos,
+    required this.onInsert,
+    required this.onRemove,
+  }) : super(key: key);
 
   @override
   State<DestinoTela> createState() => _DestinoTelaState();
@@ -16,60 +22,98 @@ class DestinoTela extends StatefulWidget {
 class _DestinoTelaState extends State<DestinoTela> {
   final TextEditingController nomeDestinoController = TextEditingController();
   final TextEditingController distanciaDestinoController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDestinos();
+  }
+
+  Future<void> _loadDestinos() async {
+    final db = DatabaseHelper.instance;
+    final destinos = await db.selectDestino();
+    setState(() {
+      widget.listaDestinos.clear();
+      widget.listaDestinos.addAll(destinos);
+    });
+  }
+
+  Future<void> _removeDestino(int index) async {
+    final db = DatabaseHelper.instance;
+    await db.deleteDestino(widget.listaDestinos[index]);
+    setState(() {
+      widget.listaDestinos.removeAt(index);
+    });
+    widget.onRemove(index); // Chama a função de remoção
+  }
+
+  Future<void> _insertDestino(Destinos destino) async {
+    final db = DatabaseHelper.instance;
+    final id = await db.insertDestino(destino);
+    setState(() {
+      widget.listaDestinos.add(Destinos(
+        id: id,
+        nomeDestino: destino.nomeDestino,
+        distanciaDestino: destino.distanciaDestino,
+      ));
+    });
+    widget.onInsert(destino); // Chama a função de inserção
+  }
+
   void openModal() {
     showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return Container(
-            width: MediaQuery.of(context).size.width,
-            height: 500,
-            child: Padding(
-              padding: const EdgeInsets.all(35.0),
-              child: Column(
-                children: [
-                  Text(
-                    "Digite as informações necessárias",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: MediaQuery.of(context).size.width,
+          height: 500,
+          child: Padding(
+            padding: const EdgeInsets.all(35.0),
+            child: Column(
+              children: [
+                Text(
+                  "Digite as informações necessárias",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 25),
+                TextField(
+                  controller: nomeDestinoController,
+                  decoration: InputDecoration(labelText: "Nome do Destino"),
+                ),
+                TextField(
+                  controller: distanciaDestinoController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: "Distância do Destino"),
+                ),
+                SizedBox(height: 35),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(300, 50),
                   ),
-                  SizedBox(height: 25),
-                  TextField(
-                    controller: nomeDestinoController,
-                    decoration: InputDecoration(label: Text("Nome do Destino")),
-                  ),
-                  TextField(
-                    controller: distanciaDestinoController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      label: Text("Distância do Destino"),
-                    ),
-                  ),
-                  SizedBox(height: 35),
-                  ElevatedButton(
-                      style: ButtonStyle(
-                          backgroundColor:
-                              WidgetStatePropertyAll(Colors.blueAccent),
-                          foregroundColor: WidgetStatePropertyAll(Colors.white),
-                          shape: WidgetStatePropertyAll(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero,
-                            ),
-                          ),
-                          minimumSize: WidgetStatePropertyAll(Size(300, 50))),
-                      onPressed: () {
-                        widget.onInsert(Destinos(nomeDestino: nomeDestinoController.text, distanciaDestino: double.parse(distanciaDestinoController.text)));
-                        Navigator.pop(context);
-                        nomeDestinoController.clear();
-                        distanciaDestinoController.clear();
-                      },
-                      child: Text("Cadastrar")),
-                ],
-              ),
+                  onPressed: () {
+                    if (nomeDestinoController.text.isNotEmpty &&
+                        distanciaDestinoController.text.isNotEmpty) {
+                      _insertDestino(Destinos(
+                        nomeDestino: nomeDestinoController.text,
+                        distanciaDestino: double.parse(distanciaDestinoController.text),
+                      ));
+                      Navigator.pop(context);
+                      nomeDestinoController.clear();
+                      distanciaDestinoController.clear();
+                    }
+                  },
+                  child: Text("Cadastrar"),
+                ),
+              ],
             ),
-          );
-        });
-        
+          ),
+        );
+      },
+    );
   }
- Widget build(BuildContext context) {
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.builder(
         itemCount: widget.listaDestinos.length,
@@ -77,7 +121,9 @@ class _DestinoTelaState extends State<DestinoTela> {
           return CardDestino(
             nomeDestino: widget.listaDestinos[index].nomeDestino,
             distanciaDestino: widget.listaDestinos[index].distanciaDestino,
-            onRemove: () => widget.onRemove(index),
+            onRemove: () {
+              _removeDestino(index);
+            },
           );
         },
       ),
@@ -91,4 +137,3 @@ class _DestinoTelaState extends State<DestinoTela> {
     );
   }
 }
-

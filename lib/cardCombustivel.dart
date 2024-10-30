@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CardCombustivel extends StatelessWidget {
   final double precoCombustivel;
   final String tipoCombustivel;
-  final DateTime dataPreco;
+  final String dataPreco;
   final Function() onRemove;
 
   const CardCombustivel({

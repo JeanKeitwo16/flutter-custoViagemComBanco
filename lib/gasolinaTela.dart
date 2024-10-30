@@ -1,121 +1,157 @@
+import 'package:custoviagem/DatabaseHelper.dart';
 import 'package:custoviagem/cardCombustivel.dart';
 import 'package:custoviagem/model/combustivel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class GasolinaTela extends StatefulWidget {
   final List<Combustivel> listaCombustivel;
-  final Function(int) onRemove;
   final Function(Combustivel) onInsert;
-  const GasolinaTela({super.key, required this.onInsert, required this.onRemove, required this.listaCombustivel});
+  final Function(int) onRemove;
+
+  const GasolinaTela({
+    Key? key,
+    required this.listaCombustivel,
+    required this.onInsert,
+    required this.onRemove,
+  }) : super(key: key);
 
   @override
   State<GasolinaTela> createState() => _GasolinaTelaState();
 }
 
 class _GasolinaTelaState extends State<GasolinaTela> {
+  late List<Combustivel> listaCombustivel = [];
   final TextEditingController precoCombustivelController = TextEditingController();
   final TextEditingController tipoCombustivelController = TextEditingController();
-   final TextEditingController dataprecoController = TextEditingController();
-   DateTime? selectedDate;
+  final TextEditingController dataPrecoController = TextEditingController(); 
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCombustiveis();
+  }
+
+  Future<void> _loadCombustiveis() async {
+    final db = DatabaseHelper.instance;
+    final combustiveis = await db.selectCombustivel();
+    setState(() {
+      listaCombustivel = combustiveis; // Sobrescreve a lista existente
+    });
+  }
+
+  Future<void> _removeCombustivel(int index) async {
+    final db = DatabaseHelper.instance;
+    await db.deleteCombustivel(listaCombustivel[index]);
+    setState(() {
+      listaCombustivel.removeAt(index);
+    });
+    widget.onRemove(index);
+  }
+
+  Future<void> _insertCombustivel(Combustivel combustivel) async {
+    final db = DatabaseHelper.instance;
+    final id = await db.insertCombustivel(combustivel);
+    combustivel.id = id; // Atualiza o id do objeto inserido
+    setState(() {
+      listaCombustivel.add(combustivel); // Adiciona diretamente
+    });
+    widget.onInsert(combustivel);
+  }
+
   void openModal() {
     showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return Container(
-            width: MediaQuery.of(context).size.width,
-            height: 500,
-            child: Padding(
-              padding: const EdgeInsets.all(35.0),
-              child: Column(
-                children: [
-                  Text(
-                    "Digite as informações necessárias",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 25),
-                  TextField(
-                    controller: precoCombustivelController,
-                    decoration: InputDecoration(label: Text("Preço do Destino")),
-                  ),
-                  TextField(
-                    controller: tipoCombustivelController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      label: Text("Tipo do Combustivel"),
-                    ),
-                  ),
-                  TextField(
-                    controller: dataprecoController,
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      label: Text("Data do Preço"),
-                    ),
-                    onTap: () async {
-                      DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(1970),
-                        lastDate: DateTime(3000),
-                      );
-                      if (pickedDate != null) {
-                        setState(() {
-                          selectedDate = pickedDate;
-                          dataprecoController.text =
-                              "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}"; // Formata a data
-                        });
-                      }
-                    },
-                  ),
-                  SizedBox(height: 35),
-                  ElevatedButton(
-                      style: ButtonStyle(
-                          backgroundColor:
-                              WidgetStatePropertyAll(Colors.blueAccent),
-                          foregroundColor: WidgetStatePropertyAll(Colors.white),
-                          shape: WidgetStatePropertyAll(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero,
-                            ),
-                          ),
-                          minimumSize: WidgetStatePropertyAll(Size(300, 50))),
-                      onPressed: () {
-                        widget.onInsert(Combustivel(tipoCombustivel: tipoCombustivelController.text, dataPreco: selectedDate!, precoCombustivel: double.parse(precoCombustivelController.text)));
-                        Navigator.pop(context);
-                        tipoCombustivelController.clear();
-                        dataprecoController.clear();
-                        precoCombustivelController.clear();
-                        selectedDate = null;
-                      },
-                      child: Text("Cadastrar")),
-                ],
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: MediaQuery.of(context).size.width,
+          height: 400,
+          padding: const EdgeInsets.all(35.0),
+          child: Column(
+            children: [
+              Text(
+                "Digite as informações necessárias",
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-            ),
-          );
-        });
-        
+              SizedBox(height: 25),
+              TextField(
+                controller: precoCombustivelController,
+                decoration: InputDecoration(labelText: "Preço do Combustível"),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: tipoCombustivelController,
+                decoration: InputDecoration(labelText: "Tipo do Combustível"),
+              ),
+              GestureDetector(
+                child: AbsorbPointer(
+                  child: TextField(
+                    controller: dataPrecoController,
+                    decoration: InputDecoration(labelText: "Data do Preço"),
+                  ),
+                ),
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(1970),
+                    lastDate: DateTime(3000),
+                  );
+                  if (pickedDate != null) {
+                    dataPrecoController.text = "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                  }
+                },
+              ),
+              SizedBox(height: 35),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(300, 50),
+                ),
+                onPressed: () {
+                  if (precoCombustivelController.text.isNotEmpty &&
+                      tipoCombustivelController.text.isNotEmpty &&
+                      dataPrecoController.text.isNotEmpty) {
+                    final novoCombustivel = Combustivel(
+                      precoCombustivel: double.parse(precoCombustivelController.text),
+                      tipoCombustivel: tipoCombustivelController.text,
+                      dataPreco: dataPrecoController.text,
+                    );
+                    _insertCombustivel(novoCombustivel);
+                    Navigator.pop(context);
+                    precoCombustivelController.clear();
+                    tipoCombustivelController.clear();
+                    dataPrecoController.clear();
+                  }
+                },
+                child: Text("Cadastrar"),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
- Widget build(BuildContext context) {
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.builder(
-        itemCount: widget.listaCombustivel.length,
+        itemCount: listaCombustivel.length,
         itemBuilder: (context, index) {
           return CardCombustivel(
-            precoCombustivel: widget.listaCombustivel[index].precoCombustivel,
-            tipoCombustivel: widget.listaCombustivel[index].tipoCombustivel,
-            dataPreco: widget.listaCombustivel[index].dataPreco,
-            onRemove: () => widget.onRemove(index),
+            precoCombustivel: listaCombustivel[index].precoCombustivel,
+            tipoCombustivel: listaCombustivel[index].tipoCombustivel,
+            dataPreco: listaCombustivel[index].dataPreco,
+            onRemove: () {
+              _removeCombustivel(index);
+            },
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          openModal();
-        },
+        onPressed: openModal,
         child: Icon(Icons.add),
         backgroundColor: Colors.blueAccent,
       ),
     );
   }
 }
-

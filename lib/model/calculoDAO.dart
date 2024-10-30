@@ -2,7 +2,7 @@ import 'package:custoviagem/DatabaseHelper.dart';
 import 'package:custoviagem/model/calculo.dart';
 import 'package:sqflite/sqflite.dart';
 
-class PessoaDAO {
+class CalculoDAO {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   Future<void> insertCalculo(Calculo calculo) async {
     final db = await _dbHelper.database;
