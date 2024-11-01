@@ -23,7 +23,6 @@ class _CarroTelaState extends State<CarroTela> {
     _loadCars();
   }
 
-  // Método para carregar carros do banco
   Future<void> _loadCars() async {
     final db = DatabaseHelper.instance;
     final carrosCarregados = await db.selectCarro();
@@ -32,24 +31,22 @@ class _CarroTelaState extends State<CarroTela> {
     });
   }
 
-  // Método para remover carro
   Future<void> _removeCar(int index) async {
     final db = DatabaseHelper.instance;
     await db.deleteCarro(listaCarros[index]); 
     setState(() {
       listaCarros.removeAt(index);
     });
-    widget.onRemove(index); // Chama a função de remoção da tela principal
+    widget.onRemove(index); 
   }
 
-  // Método para inserir carro
   Future<void> _insertCar(Carros carro) async {
     final db = DatabaseHelper.instance;
     final id = await db.insertCarro(carro);
     setState(() {
       listaCarros.add(Carros(id: id, nomeCarro: carro.nomeCarro, autonomia: carro.autonomia));
     });
-    widget.onInsert(carro); // Chama a função de inserção da tela principal
+    widget.onInsert(carro);
   }
 
   final TextEditingController nomeCarroController = TextEditingController();

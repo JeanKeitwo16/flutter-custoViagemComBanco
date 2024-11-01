@@ -25,7 +25,7 @@ class _CalculoTelaState extends State<CalculoTela> {
   String? _destinoEscolhido;
   String? _combustivelEscolhido;
   double? _custoTotal;
-  bool _isLoading = true; // Loading state
+  bool _carregamentoBanco = true;
 
   @override
   void initState() {
@@ -36,7 +36,6 @@ class _CalculoTelaState extends State<CalculoTela> {
   Future<void> _loadData() async {
     final db = DatabaseHelper.instance;
 
-    // Load data from the database
     try {
       List<Carros> carros = await db.selectCarro();
       List<Combustivel> combustivel = await db.selectCombustivel();
@@ -49,14 +48,12 @@ class _CalculoTelaState extends State<CalculoTela> {
         widget.combustivel.addAll(combustivel);
         widget.destinos.clear();
         widget.destinos.addAll(destinos);
-        _isLoading = false; // Set loading to false
+        _carregamentoBanco = false;
       });
     } catch (e) {
-      // Handle errors appropriately
       setState(() {
-        _isLoading = false;
+        _carregamentoBanco = false;
       });
-      // Optionally show a dialog or snack bar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao carregar dados: $e')),
       );
@@ -65,7 +62,6 @@ class _CalculoTelaState extends State<CalculoTela> {
 
   void calcular() {
     if (_carroEscolhido == null || _destinoEscolhido == null || _combustivelEscolhido == null) {
-      // Show error if not all fields are selected
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, preencha todos os campos!')),
       );
@@ -85,8 +81,8 @@ class _CalculoTelaState extends State<CalculoTela> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: _isLoading
-            ? CircularProgressIndicator() // Show loading indicator
+        child: _carregamentoBanco
+            ? CircularProgressIndicator()
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

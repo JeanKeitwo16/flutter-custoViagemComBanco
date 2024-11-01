@@ -4,9 +4,9 @@ import 'package:custoviagem/model/destinos.dart';
 import 'package:flutter/material.dart';
 
 class DestinoTela extends StatefulWidget {
-  final List<Destinos> listaDestinos; // Adiciona a lista de destinos
-  final Function(Destinos) onInsert; // Função para inserir destino
-  final Function(int) onRemove; // Função para remover destino
+  final List<Destinos> listaDestinos;
+  final Function(Destinos) onInsert;
+  final Function(int) onRemove;
 
   const DestinoTela({
     Key? key,
@@ -44,7 +44,7 @@ class _DestinoTelaState extends State<DestinoTela> {
     setState(() {
       widget.listaDestinos.removeAt(index);
     });
-    widget.onRemove(index); // Chama a função de remoção
+    widget.onRemove(index);
   }
 
   Future<void> _insertDestino(Destinos destino) async {
@@ -57,7 +57,7 @@ class _DestinoTelaState extends State<DestinoTela> {
         distanciaDestino: destino.distanciaDestino,
       ));
     });
-    widget.onInsert(destino); // Chama a função de inserção
+    widget.onInsert(destino);
   }
 
   void openModal() {

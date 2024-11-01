@@ -35,7 +35,7 @@ class _GasolinaTelaState extends State<GasolinaTela> {
     final db = DatabaseHelper.instance;
     final combustiveis = await db.selectCombustivel();
     setState(() {
-      listaCombustivel = combustiveis; // Sobrescreve a lista existente
+      listaCombustivel = combustiveis;
     });
   }
 
@@ -51,9 +51,9 @@ class _GasolinaTelaState extends State<GasolinaTela> {
   Future<void> _insertCombustivel(Combustivel combustivel) async {
     final db = DatabaseHelper.instance;
     final id = await db.insertCombustivel(combustivel);
-    combustivel.id = id; // Atualiza o id do objeto inserido
+    combustivel.id = id;
     setState(() {
-      listaCombustivel.add(combustivel); // Adiciona diretamente
+      listaCombustivel.add(combustivel);
     });
     widget.onInsert(combustivel);
   }
