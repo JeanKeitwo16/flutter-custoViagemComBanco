@@ -22,18 +22,12 @@ class _AppCustoViagemState extends State<AppCustoViagem> {
   int telaSelecionada = 0;
 
   List<Carros> listaCarros = [
-    Carros(nomeCarro: "Golf GT", autonomia: 21.5),
-    Carros(nomeCarro: "Fiat Uno", autonomia: 15.0),
   ];
 
   List<Destinos> listaDestinos = [
-    Destinos(nomeDestino: "Durazno", distanciaDestino: 200.0),
-    Destinos(nomeDestino: "Montevideo", distanciaDestino: 350.0),
   ];
 
   List<Combustivel> listaCombustivel = [
-    Combustivel(precoCombustivel: 545, tipoCombustivel: "Gasolina", dataPreco: "12/12/2024"),
-    Combustivel(precoCombustivel: 420, tipoCombustivel: "Álcool", dataPreco: "12/12/2024"),
   ];
 
   void _removerCarro(int index) {
